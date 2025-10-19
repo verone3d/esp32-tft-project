@@ -53,7 +53,8 @@ def mount_sd_card():
 def read_config():
     """Read configuration from config.txt on SD card."""
     config = {
-        'delay': 2  # Default delay in seconds
+        'delay': 2,  # Default delay in seconds
+        'per_image': {}  # Per-image delays
     }
     
     try:
@@ -65,15 +66,24 @@ def read_config():
                 
                 if '=' in line:
                     key, value = line.split('=', 1)
-                    key = key.strip().lower()
+                    key = key.strip()
                     value = value.strip()
                     
-                    if key == 'delay':
+                    if key.lower() == 'delay':
+                        # Default delay
                         try:
                             config['delay'] = float(value)
-                            print(f"Config: delay = {config['delay']} seconds")
+                            print(f"Config: default delay = {config['delay']} seconds")
                         except ValueError:
                             print(f"Invalid delay value: {value}, using default")
+                    else:
+                        # Per-image delay (filename=delay)
+                        try:
+                            delay_value = float(value)
+                            config['per_image'][key] = delay_value
+                            print(f"Config: {key} = {delay_value} seconds")
+                        except ValueError:
+                            print(f"Invalid delay for {key}: {value}")
         
     except OSError:
         print("No config.txt found, using defaults")
@@ -173,13 +183,21 @@ def slideshow_simple(image_files):
     except KeyboardInterrupt:
         print("\n\nSlideshow stopped")
 
-def slideshow_with_display(display, image_files, file_type='bmp', delay=2):
+def slideshow_with_display(display, image_files, file_type='bmp', config=None):
     """Full slideshow with display driver."""
+    if config is None:
+        config = {'delay': 2, 'per_image': {}}
+    
+    default_delay = config['delay']
+    per_image_delays = config['per_image']
+    
     print("\n" + "=" * 60)
     print(f" SLIDESHOW MODE ({'Fast' if file_type == 'raw' else 'Normal'})")
     print("=" * 60)
     print(f"Found {len(image_files)} images")
-    print(f"Delay: {delay} seconds per image")
+    print(f"Default delay: {default_delay} seconds")
+    if per_image_delays:
+        print(f"Custom delays: {len(per_image_delays)} images")
     print("Press Ctrl+C to stop\n")
     
     image_index = 0
@@ -190,12 +208,15 @@ def slideshow_with_display(display, image_files, file_type='bmp', delay=2):
             image_file = image_files[image_index]
             filepath = '/sd/' + image_file
             
-            print(f"[{image_index + 1}/{len(image_files)}] {image_file}")
+            # Get delay for this specific image (or use default)
+            delay = per_image_delays.get(image_file, default_delay)
+            
+            print(f"[{image_index + 1}/{len(image_files)}] {image_file} ({delay}s)")
             
             # Display the image
             display_image(display, filepath, file_type)
             
-            # Wait configured delay
+            # Wait configured delay for this image
             time.sleep(delay)
             
             # Move to next image
@@ -221,7 +242,6 @@ def main():
     
     # Read configuration
     config = read_config()
-    delay = config['delay']
     
     # Get image files
     image_files, file_type = get_image_files()
@@ -232,14 +252,15 @@ def main():
     
     print(f"\nFound {len(image_files)} images:")
     for i, f in enumerate(image_files, 1):
-        print(f"  {i}. {f}")
+        delay = config['per_image'].get(f, config['delay'])
+        print(f"  {i}. {f} ({delay}s)")
     
     # Try to initialize display
     display = init_display()
     
     if display:
         # Full slideshow with display
-        slideshow_with_display(display, image_files, file_type, delay)
+        slideshow_with_display(display, image_files, file_type, config)
     else:
         # Simple slideshow (just prints filenames)
         print("\nRunning in simple mode (no display driver)")

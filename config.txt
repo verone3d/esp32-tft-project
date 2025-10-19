@@ -1,12 +1,28 @@
 # ESP32 Slideshow Configuration
 # Copy this file to your SD card
 
-# Delay between images (in seconds)
-# Can be decimal (e.g., 1.5 for 1.5 seconds)
-delay=1
+# Default delay for all images (in seconds)
+delay=2
+
+# Per-image delays (optional)
+# Format: filename=delay_in_seconds
+# If a file isn't listed here, it uses the default delay above
+# Works with both .bmp and .raw files
 
 # Examples:
-# delay=1     (1 second)
-# delay=3.5   (3.5 seconds)
-# delay=0.5   (half second - very fast!)
-# delay=10    (10 seconds)
+img1.raw=1
+img2.raw=2
+img3.raw=3
+img4.raw=4
+logo3.raw=1.5
+rose003.raw=10
+
+# You can also use .bmp files:
+# img1.bmp=2
+# img2.bmp=3
+
+# Notes:
+# - Filenames are case-sensitive
+# - Use the exact filename from your SD card
+# - Decimal values are supported (e.g., 1.5, 2.75)
+# - Lines starting with # are comments
