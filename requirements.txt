@@ -1,0 +1,5 @@
+# Python dependencies for ESP32 TFT project
+esptool>=4.7.0
+adafruit-ampy>=1.1.0
+pyserial>=3.5
+Pillow>=10.0.0

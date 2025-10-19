@@ -1,0 +1,12 @@
+# ESP32 Slideshow Configuration
+# Copy this file to your SD card
+
+# Delay between images (in seconds)
+# Can be decimal (e.g., 1.5 for 1.5 seconds)
+delay=1
+
+# Examples:
+# delay=1     (1 second)
+# delay=3.5   (3.5 seconds)
+# delay=0.5   (half second - very fast!)
+# delay=10    (10 seconds)
